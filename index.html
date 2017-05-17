@@ -1,0 +1,261 @@
+<head>
+	<title>24 Solver</title>
+	<!-- Resources -->
+	<!-- Jquery -->
+	<script
+	src="https://code.jquery.com/jquery-3.2.1.js"
+	integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
+	crossorigin="anonymous"></script>
+	<!-- Bootstrap -->
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<!-- Animate -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+	<script>
+		$.fn.extend({
+		    animateCss: function (animationName) {
+		        var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+		        this.addClass('animated ' + animationName).one(animationEnd, function() {
+		            $(this).removeClass('animated ' + animationName);
+		        });
+		    }
+		});
+	</script>
+
+	<!-- Styles -->
+	<style>
+		button:focus {
+			outline: none !important;
+		}
+		input[type=number]::-webkit-inner-spin-button, 
+		input[type=number]::-webkit-outer-spin-button { 
+			-webkit-appearance: none; 
+			margin: 0; 
+		}
+		.header {
+			padding: 10px 0;
+			/*background-color: #891334;*/
+			background-color: #ececec;
+
+			font-family: 'Times New Roman';
+			font-weight: bold;
+			font-size: 24px;
+			letter-spacing: 1px;
+			color: #fdb813;
+			text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black, 3px 3px #192476;
+		}
+		.header .logo {
+			width: 102px;
+			margin: 0 auto;
+		}
+		#card-input {
+			width: 300px;
+			height: 300px;
+
+			margin: 20px auto;
+			position: relative;
+		}
+		#card-input #card-image {
+			position: absolute;
+			z-index: -1;
+
+			border-radius: 10px;
+			width: 300px;
+		}
+		#card-input input {
+			width: 45px;
+			position: absolute;
+		}
+		#card-input input#one {
+			left: 130px;
+    		top: 45px;
+    	}
+		#card-input input#two {
+			top: 135px;
+			left: 40px;
+		}
+		#card-input input#three {
+			top: 135px;
+    		left: 220px;
+		}
+		#card-input input#four {
+			left: 130px;
+    		top: 220px;
+		}
+		#solution {
+			font-family: Helvetica;
+			font-size: 20px;
+		}
+	</style>
+
+	<!-- Functions -->
+	<script>
+		var OPERATORS = [' + ', ' - ', ' * ', ' / '];
+
+		// return numbers from field as strings in an array
+		function grabNumbers() {
+			var nums = [];
+			nums.push( wrapNumber($('#one').val()) );
+			nums.push( wrapNumber($('#two').val()) );
+			nums.push( wrapNumber($('#three').val()) );
+			nums.push( wrapNumber($('#four').val()) );
+			return nums;
+		}
+
+		function wrapNumber(num) {
+			return "(" + num + ")";
+		}
+
+		function showSolution(solution) {
+			$('#solution').replaceWith('<div id="solution" class="text-center">' + 
+				solution + '</div>');
+			$('#solution').animateCss('bounceIn');
+		}
+
+		function showError(msg) {
+			console.log(msg);
+		}
+
+		function validNumbers() {
+			var valid = true;
+			grabNumbers().forEach(function(item, index, array) {
+				// console.log(item);
+				// console.log(item == "()");
+				if (item == "()") {
+					valid = false;
+				}
+			});
+			return valid;
+		}
+
+		// get permutations of an array of four numbers, as an array of arrays
+		function getPermutations(nums) {
+			var permutations = [];
+			nums.forEach(function(item, index, array) {
+				var first = item;
+				var newArray = array.slice();
+				newArray.splice(index,  1);
+
+				(newArray).forEach(function(item, index, array) {
+					var second = item;
+					var newArray = array.slice();
+					newArray.splice(index,  1);
+
+					(newArray).forEach(function(item, index, array) {
+						var third = item;
+						var newArray = array.slice();
+						newArray.splice(index,  1);
+						var fourth = newArray.pop()
+
+						permutations.push([first, second, third, fourth]);
+					});
+				});
+			});
+
+			return permutations
+		}
+
+		function solvePemdas(nums) {
+			solutions = [];
+			getPermutations(nums).forEach(function(item, index, array) {
+				nums =  item;
+				OPERATORS.forEach(function(item, index, array) {
+					firstOp = item;
+					OPERATORS.forEach(function(item, index, array) {
+						secondOp = item;
+						OPERATORS.forEach(function(item, index, array) {
+							thirdOp = item;
+							
+							expr = nums[0] + firstOp + nums[1] + secondOp + 
+								nums[2] + thirdOp + nums[3];
+							compute = eval(expr);
+							if (Math.abs( 24 - compute ) < 0.001 ) {
+								console.log(expr);
+								solutions.push(expr);
+							}
+						});
+					});
+				});
+			});
+			return solutions;
+		}
+
+		function solveOrder(nums) {
+			solutions = [];
+			getPermutations(nums).forEach(function(item, index, array) {
+				nums =  item;
+				expr = "";
+				OPERATORS.forEach(function(item, index, array) {
+					firstOp = item;
+					firstCompute = eval(nums[0] + firstOp + nums[1]);
+					firstExpr = nums[0] + firstOp + nums[1] + ", ";
+					OPERATORS.forEach(function(item, index, array) {
+						secondOp = item;
+						secondCompute = eval(firstCompute.toString() + secondOp + nums[2]);
+						secondExpr = firstExpr + secondOp + nums[2] + ", ";
+						OPERATORS.forEach(function(item, index, array) {
+							thirdOp = item;
+							
+							thirdCompute = eval(secondCompute.toString() + thirdOp + nums[3]);
+							thirdExpr = secondExpr + thirdOp + nums[3];
+							if (Math.abs( 24 - thirdCompute ) < 0.001 ) {
+								console.log(thirdExpr);
+								solutions.push(thirdExpr);
+							}
+						});
+					});
+				});
+			});
+			return solutions;
+		}
+	</script>
+</head>
+
+<body>
+	<div class="header text-center">
+		<div class="logo">
+			<img src="https://www.24game.com/skins/24game/images/24game-logo.png"/><br/>
+			Solver
+		</div>
+		<script>
+			$('.header .logo').mouseenter(function(){
+				$(this).animateCss('jello');
+			});
+		</script>
+	</div>
+	<div class="row">
+		<div class=".col-sm-3 .col-sm-offset-3">
+		<div id="card-input">
+			<img id="card-image" src="http://i.imgur.com/sDUzKFB.png"/>
+			<form>
+				<input type="text" class="form-control" id="one" placeholder="0">
+				<input type="text" class="form-control" id="two" placeholder="0">
+				<input type="text" class="form-control" id="three" placeholder="0">
+				<input type="text" class="form-control" id="four" placeholder="0">
+			</form>
+		</div>
+		<div class="text-center">
+			<input class="btn btn-default" id="solve-button" type="submit" value="Solve">
+		</div>
+		<br/><br/>
+		<div id="solution" class="text-center"></div>
+	</div>
+	<script>
+		$('#solve-button').click(function() {
+			if (validNumbers()) {
+				nums = grabNumbers();
+				solutionsPemdas = solvePemdas(nums);
+				solutionsOrder = solveOrder(nums);
+				if (solutionsPemdas.length > 0) {
+					showSolution(solutionsPemdas.pop());
+				} else if (solutionsOrder.length > 0) {
+					showSolution(solutionsOrder.pop());
+				} else {
+					showSolution("Could not find a solution.");
+				}
+			} else {
+				showSolution("Please enter four numbers.");
+			}
+		});
+	</script>
+</body>
