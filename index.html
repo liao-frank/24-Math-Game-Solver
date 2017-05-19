@@ -279,7 +279,12 @@
 		$('#solve-button').click(function() {
 			if (validNumbers()) {
 				nums = grabNumbers();
-				showSolution(solve(nums).join("<br/>"));
+				ans = solve(nums);
+				if (ans == null) {
+					showSolution("No solution found.");
+				} else {
+					showSolution(ans.join("<br/>"));
+				}
 			} else {
 				showSolution("Please enter four numbers.");
 			}
